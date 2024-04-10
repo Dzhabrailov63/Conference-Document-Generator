@@ -6,6 +6,16 @@ from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.section import WD_ORIENT
 from docx.shared import Mm, Cm
+import re
+
+def remove_extra_spaces(s: str):
+    s = ' '.join(s.split())
+    mask = '[А-ЯЁа-яё][.][ ][А-ЯЁа-яё][.]'
+    match = re.search(mask, s)
+    while (match != None):
+        s = s[0:match.start() + 2] + s[match.start() + 3:len(s)]
+        match = re.search(mask, s)
+    return s
 
 
 table = pd.read_excel('2024-02-17 Konferentsiia actual.xlsx')
@@ -65,6 +75,7 @@ for sec in range(0, len(sections_list)):
             # Добавление информации о заседании
             if (sec == 26):
                 head = doc.add_paragraph()
+                data[numberRecord][21] = remove_extra_spaces(data[numberRecord][21])
                 run = head.add_run('Председатель - ' + data[numberRecord][21])
                 run.font.size = Pt(12)
                 head.paragraph_format.space_before = 0
@@ -113,29 +124,34 @@ for sec in range(0, len(sections_list)):
             cell = tableW.cell(0, 1)
 
             if str(data[numberRecord][25]) != 'nan':
+                data[numberRecord][25] = remove_extra_spaces(data[numberRecord][25])
                 table.update({'Председатель подсекции': data[numberRecord][25]})
                 cell.text = '- ' + data[numberRecord][25]
             elif str(data[numberRecord][21]) != 'nan':
+                data[numberRecord][21] = remove_extra_spaces(data[numberRecord][21])
                 table.update({'Председатель секции': data[numberRecord][21]})
                 cell.text = '- ' + data[numberRecord][21]
             else:
                 cell.text = 'Председателя нет..'
 
             if str(data[numberRecord][26]) != 'nan':
+                data[numberRecord][26] = remove_extra_spaces(data[numberRecord][26])
                 table.update({'Сопредседатель подсекции': data[numberRecord][26]})
                 cell.text += ', сопредседатель - ' + data[numberRecord][26]
             elif str(data[numberRecord][22]) != 'nan':
+                data[numberRecord][22] = remove_extra_spaces(data[numberRecord][22])
                 table.update({'Сопредседатель секции': data[numberRecord][22]})
-
                 cell.text += ', сопредседатель - ' + data[numberRecord][22]
 
             cell = tableW.cell(1, 0)
             cell.text = 'Секретарь'
             cell = tableW.cell(1, 1)
             if str(data[numberRecord][27]) != 'nan':
+                data[numberRecord][27] = remove_extra_spaces(data[numberRecord][27])
                 table.update({'Секретарь подсекции': data[numberRecord][27]})
                 cell.text = '- ' + data[numberRecord][27]
             elif str(data[numberRecord][23]) != 'nan':
+                data[numberRecord][23] = remove_extra_spaces(data[numberRecord][23])
                 table.update({'Секретарь секции': data[numberRecord][23]})
                 cell.text = '- ' + data[numberRecord][23]
             else:
@@ -200,8 +216,10 @@ for sec in range(0, len(sections_list)):
                         data[numberRecord][speakers] = data[numberRecord][speakers][3:]
                     if data[numberRecord][speakers][0] == ' ':
                         data[numberRecord][speakers] = data[numberRecord][speakers][1:]
+                    data[numberRecord][speakers] = remove_extra_spaces(data[numberRecord][speakers])
                     cell.text = data[numberRecord][speakers]
 
+                    data[numberRecord][speakers + 1] = remove_extra_spaces(data[numberRecord][speakers+1])
                     table.update({'Докладчик[' + str(i) + ']': data[numberRecord][speakers+1]})
 
                     position = 0
@@ -215,9 +233,11 @@ for sec in range(0, len(sections_list)):
 
                     cell = tableS.cell(i + 1, 2)
                     cell.text = data[numberRecord][speakers+1]
+                    data[numberRecord][speakers + 2] = remove_extra_spaces(data[numberRecord][speakers+2])
                     table.update({'Научный руководитель[' + str(i) + ']': data[numberRecord][speakers+2]})
                     cell = tableS.cell(i + 1, 3)
                     if str(data[numberRecord][speakers+3]) != 'nan':
+                        data[numberRecord][speakers + 3] = remove_extra_spaces(data[numberRecord][speakers+3])
                         table.update({'Второй научный руководитель[' + str(i) + ']': data[numberRecord][speakers+3]})
                         cell.text = data[numberRecord][speakers+2] + ',\n' + data[numberRecord][speakers+3]
                     else:
